@@ -1,0 +1,35 @@
+module dynamics
+
+  use iso_fortran_env, only : dp => real64, i4 => int32
+  
+  implicit none
+
+  real(dp), parameter :: pi = acos(-1.0_dp)
+  complex(dp), parameter :: i = (0.0_dp, 1.0_dp)
+  
+  subroutine thermalization(u,N_thermalization,beta)
+
+    complex(dp), dimension(:,:,:), intent(inout) :: u
+    integer(i4) :: N_thermalization
+    real(dp) :: beta
+
+    integer(i4) :: i_sweeps
+
+    call hot_start(u)
+    !call cold_start(u)
+    
+  end subroutine thermalization
+
+
+  subroutine hot_start(u)
+
+    complex(dp), intent(in), dimension(:,:,:) :: u
+    real(dp), dimension(size(u(1,:,1))) :: phi
+
+    call random_number(phi)
+
+    u = exp(i*phi)
+    
+  end subroutine hot_start
+  
+end module dynamics
