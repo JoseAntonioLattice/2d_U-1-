@@ -1,0 +1,7 @@
+FC = gfortran
+
+TARGET = 2dU1.exe
+
+
+SRC = src
+SOURCE = parameters.f90 main.f90

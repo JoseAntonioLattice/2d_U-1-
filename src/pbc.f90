@@ -4,7 +4,7 @@ module pbc
   
   implicit none
 
-  integer, allocatable, dimension(:) ip, im
+  integer, allocatable, dimension(:) :: ip, im
 
 contains
 
@@ -33,10 +33,10 @@ contains
 
   function ipf(vector, mu)
 
-    integer(i4) :: dimension(:), intent(in) :: vector
+    integer(i4), dimension(:), intent(in) :: vector
     integer(i4) :: mu
 
-    integer(i4) :: dimension(size(vector)) :: ipf
+    integer(i4), dimension(size(vector)) :: ipf
     
     ipf = vector
 
@@ -46,10 +46,10 @@ contains
 
   function imf(vector, mu)
 
-    integer(i4) :: dimension(:), intent(in) :: vector
+    integer(i4), dimension(:), intent(in) :: vector
     integer(i4) :: mu
 
-    integer(i4) :: dimension(size(vector)) :: imf
+    integer(i4), dimension(size(vector)) :: imf
     
     imf = vector
 

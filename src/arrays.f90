@@ -4,6 +4,6 @@ module arrays
 
   implicit none
 
-  complex(dp), allocatable, dimension(:,:) :: u
+  complex(dp), allocatable, dimension(:,:,:) :: u
   
 end module arrays
