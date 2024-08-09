@@ -10,13 +10,26 @@ module dynamics
 
 contains
 
-  subroutine set_memory(u,L)
+  subroutine evolution()
+
+
+  end subroutine evolution
+ 
+  subroutine set_memory(u,L,beta,betai,betaf,nbeta)
 
     complex(dp), allocatable, dimension(:,:,:) :: u
     integer(i4), intent(in) :: L
+    real(dp), allocatable, dimension(:) :: beta
+    real(dp), intent(in) :: betai, betaf
+    integer(i4), intent(in) :: nbeta
 
     call set_pbc(L)
     allocate(u(2,L,L))
+    allocate(beta(nbeta))
+
+    do i_beta = 1, nbeta 
+       beta(i_beta) = betai + (betaf - betai)/(nbeta-1)*(i-1)
+    end do
     
   end subroutine set_memory
   
@@ -27,8 +40,11 @@ contains
     real(dp), intent(in) :: beta
 
     integer(i4) :: i_skip, i_sweeps
+    integer(i4) :: L
+
+    L = size(u(1,:,1))
     
-    !call cold_start(u)
+    call hot_start(u,L)
     call thermalization(u, N_thermalization, beta)
 
     do i_sweeps = 1, N_measurements
@@ -51,7 +67,7 @@ contains
     !L = size(u(1,:,1))
 
     !call hot_start(u,L)
-    call cold_start(u)
+    !call cold_start(u)
 
     do i_sweeps = 1, N_thermalization
        call sweeps(u,beta)
@@ -195,6 +211,8 @@ contains
           action = action + real(plaquette(u,[x,y]))
        end do
     end do
+
+    action = action / L**2
     
   end function action
   

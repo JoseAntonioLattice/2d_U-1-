@@ -5,5 +5,6 @@ module arrays
   implicit none
 
   complex(dp), allocatable, dimension(:,:,:) :: u
+  real(dp), allocatable, dimension(:) :: beta 
   
 end module arrays
