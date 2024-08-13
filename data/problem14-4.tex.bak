@@ -45,7 +45,7 @@ We define the sum of staples as
 The change in the action  by a local update when changing $U_{\mu}(x) \to U'_{\mu}(x)$ is
 \begin{equation}
 	\label{eq:DS}
-	\Delta S = -\beta \ \text{Re } \text{Tr} \left[ \left( U'_{\mu}(x) - U_{\mu}(x) \right)\Sigma_{\mu}^{\dagger}\right].
+	\Delta S = -\beta \ \text{Re } \left[ \left( U'_{\mu}(x) - U_{\mu}(x) \right)\Sigma_{\mu}^{\dagger}\right].
 \end{equation}
 
 We use the Metropolis algorithm for the simulation as decribed in the following steps:
@@ -60,8 +60,8 @@ We use the Metropolis algorithm for the simulation as decribed in the following 
 
 	\begin{figure}
 		\centering
-		\includegraphics[scale=0.6]{n_term=500-nmeas=5000-nskip=10.pdf}
-		\caption{Expectation value of the plaquette variable vs.\ $\beta = 2/e^2$ with a volume $V = 20^2$. The errors were computed using the Jackknife error. The parameters of the simulation were: at each value of $\beta$, $5000$ measuremnts were made separated by 10 sweeps and a thermalization of 500 sweeps.}
+		\includegraphics[scale=0.6]{n_term=1000-nmeas=5000-nskip=20.pdf}
+		\caption{Expectation value of the plaquette variable vs.\ $\beta = 2/e^2$ with a volume $V = 20^2$. The errors were computed using the Jackknife error. The parameters of the simulation were: at each value of $\beta$, $5000$ measuremnts were made separated by 20 sweeps and a thermalization of 1000 sweeps.}
 	\end{figure}
 
 \end{document}

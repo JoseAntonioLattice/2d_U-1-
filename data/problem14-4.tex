@@ -20,7 +20,7 @@ We call $U_{\mu}(x)$ to a U(1) variable at point $x$ in the $\mu$ direction. For
 where $\beta = \frac{2}{e^2}$ and $e$ being the gauge coupling. The plaquettes are defined by
 \begin{equation}
 	\label{eq:plaquette}
-	U_{\mu\nu}(x) = U_{\mu}(x)U_{\nu}(x+\hat{\mu})U_{\mu}^{\dagger}(x+\hat{\nu})U_{\nu}^{\dagger}(x) 
+	U_{\mu\nu}(x) = U_{\mu}(x)U_{\nu}(x+\hat{\mu})U_{\mu}^{*}(x+\hat{\nu})U_{\nu}^{*}(x) 
 \end{equation}
 
 The sum of plaquette variables is computed using 
@@ -38,14 +38,14 @@ where $V=L^d$ is the volume of the lattice and $D = \frac{d(d-1)}{2}$ is the num
 We define the sum of staples as
 \begin{equation}
 	\label{eq:staples}
-	\Sigma_{\mu}(x) = \sum_{\nu \neq \mu} \left[ U_{\nu}(x)U_{\mu}(x+\hat{\nu})U_{\nu}^{\dagger}(x+\hat{\mu}) + U_{\nu}^{\dagger}(x-\hat{\nu})U_{\mu}(x-\hat{\nu})U_{\nu}(x+\hat{\mu}-\hat{\nu})\right] .
+	\Sigma_{\mu}(x) = \sum_{\nu \neq \mu} \left[ U_{\nu}(x)U_{\mu}(x+\hat{\nu})U_{\nu}^{*}(x+\hat{\mu}) + U_{\nu}^{*}(x-\hat{\nu})U_{\mu}(x-\hat{\nu})U_{\nu}(x+\hat{\mu}-\hat{\nu})\right] .
 \end{equation}
 
 
 The change in the action  by a local update when changing $U_{\mu}(x) \to U'_{\mu}(x)$ is
 \begin{equation}
 	\label{eq:DS}
-	\Delta S = -\beta \ \text{Re } \text{Tr} \left[ \left( U'_{\mu}(x) - U_{\mu}(x) \right)\Sigma_{\mu}^{\dagger}\right].
+	\Delta S = -\beta \ \text{Re}\ \left[ \left( U'_{\mu}(x) - U_{\mu}(x) \right)\Sigma_{\mu}^{*}\right].
 \end{equation}
 
 We use the Metropolis algorithm for the simulation as decribed in the following steps:
@@ -61,7 +61,7 @@ We use the Metropolis algorithm for the simulation as decribed in the following 
 	\begin{figure}
 		\centering
 		\includegraphics[scale=0.6]{n_term=1000-nmeas=5000-nskip=20.pdf}
-		\caption{Expectation value of the plaquette variable vs.\ $\beta = 2/e^2$ with a volume $V = 20^2$. The errors were computed using the Jackknife error. The parameters of the simulation were: at each value of $\beta$, $5000$ measuremnts were made separated by 20 sweeps and a thermalization of 1000 sweeps.}
+		\caption{Expectation value of the plaquette variable vs.\ $\beta = 2/e^2$ with a volume $V = 20^2$. The errors were computed using the Jackknife error. The parameters of the simulation were: at each value of $\beta$, $5000$ measurements were made separated by 20 sweeps and a thermalization of 1000 sweeps.}
 	\end{figure}
 
 \end{document}
