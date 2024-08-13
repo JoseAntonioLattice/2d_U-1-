@@ -9,49 +9,45 @@ module dynamics
   complex(dp), parameter :: i = (0.0_dp, 1.0_dp)
 
 contains
-
-  subroutine evolution()
-
-
-  end subroutine evolution
  
-  subroutine set_memory(u,L,beta,betai,betaf,nbeta)
+  subroutine set_memory(u,L,beta,betai,betaf,nbeta, plqaction,n_measurements)
 
     complex(dp), allocatable, dimension(:,:,:) :: u
     integer(i4), intent(in) :: L
     real(dp), allocatable, dimension(:) :: beta
     real(dp), intent(in) :: betai, betaf
-    integer(i4), intent(in) :: nbeta
+    real(dp), allocatable, dimension(:) :: plqaction
+    integer(i4), intent(in) :: nbeta, n_measurements
 
+    integer(i4) :: i_beta
+    
     call set_pbc(L)
     allocate(u(2,L,L))
     allocate(beta(nbeta))
 
     do i_beta = 1, nbeta 
-       beta(i_beta) = betai + (betaf - betai)/(nbeta-1)*(i-1)
+       beta(i_beta) = betai + (betaf - betai)/(nbeta-1)*(i_beta-1)
     end do
+    allocate(plqaction(n_measurements))
     
   end subroutine set_memory
   
-  subroutine initialization(u,beta,N_thermalization,N_measurements, N_skip)
+  subroutine initialization(u,plqaction,beta,N_thermalization,N_measurements, N_skip)
 
-    complex(dp), dimension(:,:,:), intent(out) :: u
+    complex(dp), dimension(:,:,:), intent(inout) :: u
+    real(dp), dimension(:), intent(out) :: plqaction
     integer(i4), intent(in) :: N_thermalization, N_measurements, N_skip
     real(dp), intent(in) :: beta
 
     integer(i4) :: i_skip, i_sweeps
-    integer(i4) :: L
 
-    L = size(u(1,:,1))
-    
-    call hot_start(u,L)
     call thermalization(u, N_thermalization, beta)
 
     do i_sweeps = 1, N_measurements
        do i_skip = 1, n_skip
           call sweeps(u,beta)
        end do
-       print*, action(u)
+       plqaction(i_sweeps) = action(u)
     end do
     
   end subroutine initialization
@@ -62,12 +58,7 @@ contains
     integer(i4) :: N_thermalization
     real(dp) :: beta
 
-    integer(i4) :: i_sweeps!,L
-
-    !L = size(u(1,:,1))
-
-    !call hot_start(u,L)
-    !call cold_start(u)
+    integer(i4) :: i_sweeps
 
     do i_sweeps = 1, N_thermalization
        call sweeps(u,beta)
@@ -152,7 +143,7 @@ contains
     
     if ( mu == 1 ) then
        nu = 2
-    else
+    elseif( mu == 2)then
        nu = 1
     end if
 
