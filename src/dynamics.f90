@@ -18,16 +18,23 @@ contains
     real(dp), intent(in) :: betai, betaf
     real(dp), allocatable, dimension(:) :: plqaction
     integer(i4), intent(in) :: nbeta, n_measurements
-
+    real(dp), allocatable, dimension(:) :: beta_copy
     integer(i4) :: i_beta
     
     call set_pbc(L)
     allocate(u(2,L,L))
-    allocate(beta(nbeta))
+    allocate(beta(nbeta), beta_copy(nbeta))
 
     do i_beta = 1, nbeta 
        beta(i_beta) = betai + (betaf - betai)/(nbeta-1)*(i_beta-1)
     end do
+    beta = 2/beta**2
+    beta_copy = beta
+
+    do i_beta = 1, nbeta
+       beta(i_beta) = beta_copy(nbeta+1-i_beta)
+    end do
+    
     allocate(plqaction(n_measurements))
     
   end subroutine set_memory

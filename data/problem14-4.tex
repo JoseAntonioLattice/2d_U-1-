@@ -12,7 +12,7 @@
 \begin{document}
 \maketitle
 
-We call $U_{\mu}(x)$ to a U(1) variable at point $x$ in the $\mu$ direction. For U(1), the lattice gauge action reads
+A U(1) variable at point $x$ in the $\mu$ direction is denoted by $U_{\mu}(x)$. For U(1), the lattice gauge action reads
 \begin{equation}
 	\label{eq:wilson_action}
 	S[U] = \beta\sum_x \sum_{\mu < \nu} \text{Re}\  \left[1 - U_{\mu\nu}(x) \right],
@@ -60,7 +60,7 @@ We use the Metropolis algorithm for the simulation as decribed in the following 
 
 	\begin{figure}
 		\centering
-		\includegraphics[scale=0.6]{n_term=1000-nmeas=5000-nskip=20.pdf}
+		\includegraphics[scale=0.6]{L=100_n_term=1000-nmeas=5000-nskip=20.pdf}
 		\caption{Expectation value of the plaquette variable vs.\ $\beta = 2/e^2$ with a volume $V = 20^2$. The errors were computed using the Jackknife error. The parameters of the simulation were: at each value of $\beta$, $5000$ measurements were made separated by 20 sweeps and a thermalization of 1000 sweeps.}
 	\end{figure}
 
