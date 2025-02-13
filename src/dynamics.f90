@@ -28,12 +28,12 @@ contains
     do i_beta = 1, nbeta 
        beta(i_beta) = betai + (betaf - betai)/(nbeta-1)*(i_beta-1)
     end do
-    beta = 2/beta**2
-    beta_copy = beta
+    !beta = 2/beta**2
+    !beta_copy = beta
 
-    do i_beta = 1, nbeta
-       beta(i_beta) = beta_copy(nbeta+1-i_beta)
-    end do
+    !do i_beta = 1, nbeta
+    !   beta(i_beta) = beta_copy(nbeta+1-i_beta)
+    !end do
     
     allocate(plqaction(n_measurements))
     
@@ -103,14 +103,15 @@ contains
     integer(i4) :: L
 
     L = size(u(1,:,1))
-    
-    do x = 1, L
-       do y = 1, L
-          do mu = 1, 2
-             call metropolis(U,[x,y],mu,beta)
-          end do
-       end do
-    end do
+
+    call hmc_jaime(U,beta,40,2.0_dp,L)
+    !do x = 1, L
+    !   do y = 1, L
+    !      do mu = 1, 2
+    !         call metropolis(U,[x,y],mu,beta)
+    !      end do
+    !   end do
+    !end do
     
   end subroutine sweeps
 
@@ -139,10 +140,279 @@ contains
     
   end subroutine metropolis
 
+  subroutine hmc(U, beta, N, Time, L)
+    complex(dp), intent(inout) :: U(2,L,L)
+    integer(i4), intent(in) :: N, L
+    real(dp), intent(in) :: beta, Time
+    complex(dp), dimension(2,L,L) ::  Up
+    real(dp), dimension(2,L,L) :: Forces, p, pnew
+    integer(i4) :: k, x, y, mu
+    real(dp) :: DeltaH,r, deltaT
+
+    deltat = Time/N
+    call generate_pi(p,L)
+
+    !! k = 0
+    !U_0
+    up = u
+
+    !P_0
+    pnew = p
+
+    !Compute F[U_0]
+    call compute_forces(Forces,beta,u,L)
+    ! Compute P_{1/2} = P_0 + 0.5*dt*F[U_0]
+    do x = 1, L
+       do y = 1, L
+          do mu = 1, 2
+             pnew(mu,x,y) = pnew(mu,x,y) + 0.5*deltaT*Forces(mu,x,y)
+          end do
+       end do
+    end do
+    
+    
+    ! k = 1, n -1
+    !U_k = exp(i*dt*P_{k-1/2})U_{k-1}
+    do k = 1, N - 1
+       do x = 1, L
+          do y = 1, L
+             do mu = 1, 2
+                up(mu,x,y)= up(mu,x,y)*exp(i*DeltaT*pnew(mu,x,y))
+             end do
+          end do
+       end do
+
+       !compute F[U_k]
+       call compute_forces(Forces,beta,up,L)
+       !P_{k+1/2} = P_{k-1/2} + dt*F[U_k]
+       do x = 1, L
+          do y = 1, L
+             do mu = 1, 2
+                pnew(mu,x,y) = pnew(mu,x,y) + deltaT*Forces(mu,x,y)
+             end do
+          end do
+       end do
+       
+    end do 
+
+    ! k = n
+    !U_n = exp(i*dt*P_{n-1/2})U_{n-1}
+    do x = 1, L
+       do y = 1, L
+          do mu = 1, 2
+             up(mu,x,y) = up(mu,x,y)*exp(i*DeltaT*pnew(mu,x,y))
+          end do
+       end do
+    end do
+
+    !compute F[U_n]
+    call compute_forces(Forces,beta,up,L)
+    !P_n = P_{n-1/2} + 0.5*dt*F[U_n]
+    do x = 1, L
+       do y = 1, L
+          do mu = 1, 2
+             p(mu,x,y) = p(mu,x,y) + 0.5*DeltaT*forces(mu,x,y)
+          end do
+       end do
+    end do
+    
+    DeltaH = DH(u,up,p,pnew,beta)
+    call random_number(r)
+    print*, DeltaH, r, exp(-DeltaH)
+    if( r <= exp(-DeltaH) ) u = up
+    
+  end subroutine hmc
+
+  subroutine hmc_jaime(U,beta,Ntime,time,L)
+    integer(i4), intent(in) :: L, Ntime
+    complex(dp), dimension(2,L,L), intent(inout) :: U
+    real(dp), intent(in) :: beta, time
+
+    complex(dp), dimension(2,L,L) :: unew
+    real(dp), dimension(2,L,L) :: p, pnew, force
+
+    real(dp) :: r,u1,u2, DeltaH, dt
+    integer(i4) :: x, y, mu, k
+
+
+    dt = time/NTime
+    call generate_pi(p,L)
+     
+    unew = u
+    pnew = p
+
+    !do x = 1, L
+    !   do y = 1, L
+    !      do mu = 1, 2
+    !         unew(mu,x,y) = unew(mu,x,y) * exp(0.5*i*dt*pnew(mu,x,y))
+    !      end do
+    !   end do
+    !end do
+
+    unew = unew*exp(0.5*i*dt*pnew)
+    call compute_forces(force,beta,unew,L)
+
+    !print*, force(1,1,1)
+    
+    do k = 1, Ntime - 2
+       !do x = 1, L
+       !   do y = 1 ,L
+       !      do mu = 1, 2
+       !         pnew(mu,x,y) = pnew(mu,x,y) + dt*force(mu,x,y)
+       !         unew(mu,x,y) = unew(mu,x,y) * exp(i*dt*pnew(mu,x,y))
+       !      end do
+       !   end do
+       !end do
+       pnew = pnew + dt*force
+       unew = unew*exp(i*dt*pnew)
+       call compute_forces(force,beta,unew,L)
+       !print*, force(1,1,1)
+    end do
+
+   
+       
+    !do x = 1, L
+    !  do y = 1, L
+    !     do mu = 1, 2
+    !         pnew(mu,x,y) = pnew(mu,x,y) + dt*force(mu,x,y)
+    !         unew(mu,x,y) = unew(mu,x,y) * exp(0.5*i*dt*pnew(mu,x,y))
+    !      end do
+    !   end do
+    !end do
+     pnew = pnew + dt*force
+     unew = unew*exp(0.5*i*dt*pnew)
+
+    call random_number(r)
+    !DeltaH = 0.5*sum(pnew**2) - 0.5*sum(p**2) - L**2*beta*(action(unew) - action(u))
+    !DeltaH = 0.5*sum(pnew**2) - 0.5*sum(p**2) + action2(unew,beta) - action2(u,beta)
+    !print*, DeltaH!unew(1,1,1), abs(unew(1,1,1)), p(1,1,1)
+    DeltaH = DH(u,unew,p,pnew,beta)
+    !print*, DeltaH, r, exp(-DeltaH)
+    if( r <= exp(-DeltaH)) u = unew
+    
+  end subroutine hmc_jaime
+
+  subroutine hmc_knechtli(u,beta,nsteps,time,L)
+    integer(i4), intent(in) :: L, nsteps
+    complex(dp), intent(inout), dimension(2,L,L) :: u
+    real(dp), intent(in) :: time, beta
+    complex(dp), dimension(2,L,L) :: unew
+    real(dp), dimension(2,L,L) :: p, pnew, force 
+    real(dp) :: r, DeltaH, dt
+    integer(i4) :: x, y, mu, k
+
+    dt = time/nsteps
+    
+    call generate_pi(p,L)
+    !call random_number(p)
+    unew = u
+    pnew = p
+
+    call compute_forces(force,beta,u,L)
+    do k = 1, nsteps
+       do x = 1, L
+          do y = 1, L
+             do mu = 1, 2
+                !P_{k-1/2} = P_{k-1} +F_{k-1}        
+                pnew(mu,x,y) = pnew(mu,x,y) + 0.5*dt*Force(mu,x,y)
+                !U_k = exp(i*dt*P_{k-1/2})U_{k-1}
+                unew(mu,x,y) = unew(mu,x,y) * exp(dt*i*pnew(mu,x,y))
+             end do
+          end do
+       end do
+       !F_k
+       call compute_forces(force,beta,unew,L)
+       do x = 1, L
+          do y = 1, L
+             do mu = 1, 2
+                ! P_k = P_{k-1/2} + dt*F_k
+                pnew(mu,x,y) = pnew(mu,x,y) + 0.5*dt*Force(mu,x,y)
+             end do
+          end do
+       end do
+    end do
+
+    call random_number(r)
+    !DeltaH = 0.5*sum(pnew**2) - 0.5*sum(p**2) - L**2*beta*(action(unew) - action(u))
+   
+    !DeltaH = DH(u,unew,p,pnew,beta)
+    !print*, DeltaH, r, exp(-DeltaH)
+    if( r <= exp(-DeltaH)) u = unew
+    
+  end subroutine hmc_knechtli
+
+  
+  function DH(U,Unew,P,Pnew,beta)
+    real(dp) :: DH
+    complex(dp), dimension(:,:,:), intent(in) :: U, Unew
+    real(dp), dimension(:,:,:), intent(in) :: P, Pnew
+    real(dp), intent(in) :: beta
+    integer(i4) :: x, y,mu, L
+    real(dp) :: DeltaS
+    L = size(U(1,:,1))
+    DH = 0.0_dp
+    DeltaS = 0.0_dp
+    do x = 1, L
+       do y = 1, L
+          DeltaS = DeltaS + real(plaquette(u,[x,y]) - plaquette(unew,[x,y]))
+       end do
+    end do
+
+    DeltaS = beta*DeltaS
+
+    do x = 1, L
+       do y = 1, L
+          do mu = 1, 2
+             DH = DH + (pnew(mu,x,y))**2 - (p(mu,x,y))**2
+          end do
+       end do
+    end do
+
+    DH = 0.5*DH + DeltaS
+    
+    
+  end function DH
+
+  
+  subroutine generate_pi(p,L)
+    integer(i4), intent(in) :: L
+    real(dp), intent(out), dimension(2,L,L) :: p
+    real(dp) :: u1, u2
+    integer(i4) :: x, y
+
+    do x = 1, L
+       do y = 1, L
+          call random_number(u1)
+          call random_number(u2)
+          p(1,x,y) = sqrt(-2*log(u1))*cos(2*pi*u2) 
+          p(2,x,y) = sqrt(-2*log(u1))*sin(2*pi*u2)
+       end do
+    end do
+  end subroutine generate_pi
+
+  subroutine compute_forces(forces,beta,u,L)
+    integer(i4), intent(in) :: L
+    complex(dp), intent(in) :: u(2,L,L)
+    real(dp), intent(out) :: Forces(2,L,L)
+    real(dp), intent(in) :: beta
+    complex(dp) :: stp
+    integer(i4) :: x, y, mu
+
+    do x = 1, L
+       do y = 1, L
+          do mu = 1, 2
+             stp = u(mu,x,y)*conjg(staples(u,[x,y],mu))
+             forces(mu,x,y) = -beta*stp%im
+          end do
+       end do
+    end do
+    
+  end subroutine compute_forces
+  
   function staples(u,x,mu)
 
     complex(dp) :: staples
-    complex(dp), dimension(:,:,:), intent(inout) :: u
+    complex(dp), dimension(:,:,:), intent(in) :: u
     integer(i4), intent(in) :: x(2), mu
     integer(i4), dimension(2) :: x2, x3, x4, x5, x6
 
@@ -213,5 +483,29 @@ contains
     action = action / L**2
     
   end function action
+
+  
+  function action2(u,beta)
+
+    real(dp) :: action2
+    
+    complex(dp), dimension(:,:,:), intent(in) :: u
+    real(dp), intent(in) :: beta
+    integer(i4) :: x,y
+    integer(i4) :: L
+
+    L = size(U(1,:,1))
+
+    action2 = 0.0_dp
+    
+    do x = 1, L
+       do y = 1, L
+          action2 = action2 + beta*(1.0_dp - real(plaquette(u,[x,y])))
+       end do
+    end do
+
+    !action2 = beta*(L**2 - action2)
+    
+  end function action2
   
 end module dynamics
