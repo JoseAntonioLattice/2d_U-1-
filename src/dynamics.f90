@@ -104,14 +104,14 @@ contains
 
     L = size(u(1,:,1))
 
-    call hmc_jaime(U,beta,40,2.0_dp,L)
-    !do x = 1, L
-    !   do y = 1, L
-    !      do mu = 1, 2
-    !         call metropolis(U,[x,y],mu,beta)
-    !      end do
-    !   end do
-    !end do
+    !call hmc(U,beta,50,1.0_dp,L)
+    do x = 1, L
+       do y = 1, L
+          do mu = 1, 2
+             call metropolis(U,[x,y],mu,beta)
+          end do
+       end do
+    end do
     
   end subroutine sweeps
 
@@ -155,70 +155,40 @@ contains
     !! k = 0
     !U_0
     up = u
-
     !P_0
     pnew = p
 
     !Compute F[U_0]
     call compute_forces(Forces,beta,u,L)
-    ! Compute P_{1/2} = P_0 + 0.5*dt*F[U_0]
-    do x = 1, L
-       do y = 1, L
-          do mu = 1, 2
-             pnew(mu,x,y) = pnew(mu,x,y) + 0.5*deltaT*Forces(mu,x,y)
-          end do
-       end do
-    end do
-    
-    
-    ! k = 1, n -1
-    !U_k = exp(i*dt*P_{k-1/2})U_{k-1}
-    do k = 1, N - 1
-       do x = 1, L
-          do y = 1, L
-             do mu = 1, 2
-                up(mu,x,y)= up(mu,x,y)*exp(i*DeltaT*pnew(mu,x,y))
-             end do
-          end do
-       end do
 
+    ! Compute P_{1/2} = P_0 + 0.5*dt*F[U_0]
+    pnew = pnew + 0.5*deltaT*Forces
+ 
+    ! k = 1, n -1
+    do k = 1, N - 1
+       !U_k = exp(i*dt*P_{k-1/2})U_{k-1}
+       up = up * exp(i*DeltaT*pnew)
+       
        !compute F[U_k]
        call compute_forces(Forces,beta,up,L)
+      
        !P_{k+1/2} = P_{k-1/2} + dt*F[U_k]
-       do x = 1, L
-          do y = 1, L
-             do mu = 1, 2
-                pnew(mu,x,y) = pnew(mu,x,y) + deltaT*Forces(mu,x,y)
-             end do
-          end do
-       end do
-       
+       pnew = pnew + deltaT*Forces
     end do 
 
     ! k = n
     !U_n = exp(i*dt*P_{n-1/2})U_{n-1}
-    do x = 1, L
-       do y = 1, L
-          do mu = 1, 2
-             up(mu,x,y) = up(mu,x,y)*exp(i*DeltaT*pnew(mu,x,y))
-          end do
-       end do
-    end do
+    up = up * exp(i*DeltaT*pnew)
 
     !compute F[U_n]
     call compute_forces(Forces,beta,up,L)
-    !P_n = P_{n-1/2} + 0.5*dt*F[U_n]
-    do x = 1, L
-       do y = 1, L
-          do mu = 1, 2
-             p(mu,x,y) = p(mu,x,y) + 0.5*DeltaT*forces(mu,x,y)
-          end do
-       end do
-    end do
     
+    !P_n = P_{n-1/2} + 0.5*dt*F[U_n]
+    p = p + 0.5*DeltaT*Forces
+
+    ! Metropolis step
     DeltaH = DH(u,up,p,pnew,beta)
     call random_number(r)
-    print*, DeltaH, r, exp(-DeltaH)
     if( r <= exp(-DeltaH) ) u = up
     
   end subroutine hmc
@@ -241,53 +211,21 @@ contains
     unew = u
     pnew = p
 
-    !do x = 1, L
-    !   do y = 1, L
-    !      do mu = 1, 2
-    !         unew(mu,x,y) = unew(mu,x,y) * exp(0.5*i*dt*pnew(mu,x,y))
-    !      end do
-    !   end do
-    !end do
-
     unew = unew*exp(0.5*i*dt*pnew)
     call compute_forces(force,beta,unew,L)
-
-    !print*, force(1,1,1)
     
     do k = 1, Ntime - 2
-       !do x = 1, L
-       !   do y = 1 ,L
-       !      do mu = 1, 2
-       !         pnew(mu,x,y) = pnew(mu,x,y) + dt*force(mu,x,y)
-       !         unew(mu,x,y) = unew(mu,x,y) * exp(i*dt*pnew(mu,x,y))
-       !      end do
-       !   end do
-       !end do
        pnew = pnew + dt*force
        unew = unew*exp(i*dt*pnew)
        call compute_forces(force,beta,unew,L)
-       !print*, force(1,1,1)
     end do
-
-   
-       
-    !do x = 1, L
-    !  do y = 1, L
-    !     do mu = 1, 2
-    !         pnew(mu,x,y) = pnew(mu,x,y) + dt*force(mu,x,y)
-    !         unew(mu,x,y) = unew(mu,x,y) * exp(0.5*i*dt*pnew(mu,x,y))
-    !      end do
-    !   end do
-    !end do
-     pnew = pnew + dt*force
-     unew = unew*exp(0.5*i*dt*pnew)
-
+    
+    pnew = pnew + dt*force
+    unew = unew*exp(0.5*i*dt*pnew)
+    
     call random_number(r)
-    !DeltaH = 0.5*sum(pnew**2) - 0.5*sum(p**2) - L**2*beta*(action(unew) - action(u))
-    !DeltaH = 0.5*sum(pnew**2) - 0.5*sum(p**2) + action2(unew,beta) - action2(u,beta)
-    !print*, DeltaH!unew(1,1,1), abs(unew(1,1,1)), p(1,1,1)
+    
     DeltaH = DH(u,unew,p,pnew,beta)
-    !print*, DeltaH, r, exp(-DeltaH)
     if( r <= exp(-DeltaH)) u = unew
     
   end subroutine hmc_jaime
@@ -304,39 +242,24 @@ contains
     dt = time/nsteps
     
     call generate_pi(p,L)
-    !call random_number(p)
+    
     unew = u
     pnew = p
 
     call compute_forces(force,beta,u,L)
     do k = 1, nsteps
-       do x = 1, L
-          do y = 1, L
-             do mu = 1, 2
-                !P_{k-1/2} = P_{k-1} +F_{k-1}        
-                pnew(mu,x,y) = pnew(mu,x,y) + 0.5*dt*Force(mu,x,y)
-                !U_k = exp(i*dt*P_{k-1/2})U_{k-1}
-                unew(mu,x,y) = unew(mu,x,y) * exp(dt*i*pnew(mu,x,y))
-             end do
-          end do
-       end do
+       !P_{k-1/2} = P_{k-1} +F_{k-1}        
+       pnew = pnew + 0.5*dt*Force
+       !U_k = exp(i*dt*P_{k-1/2})U_{k-1}
+       unew = unew(mu,x,y) * exp(dt*i*pnew)
        !F_k
        call compute_forces(force,beta,unew,L)
-       do x = 1, L
-          do y = 1, L
-             do mu = 1, 2
-                ! P_k = P_{k-1/2} + dt*F_k
-                pnew(mu,x,y) = pnew(mu,x,y) + 0.5*dt*Force(mu,x,y)
-             end do
-          end do
-       end do
+       ! P_k = P_{k-1/2} + dt*F_k
+       pnew = pnew + 0.5*dt*Force
     end do
 
+    !Metropolis step
     call random_number(r)
-    !DeltaH = 0.5*sum(pnew**2) - 0.5*sum(p**2) - L**2*beta*(action(unew) - action(u))
-   
-    !DeltaH = DH(u,unew,p,pnew,beta)
-    !print*, DeltaH, r, exp(-DeltaH)
     if( r <= exp(-DeltaH)) u = unew
     
   end subroutine hmc_knechtli
