@@ -14,6 +14,7 @@ program U1_2d
   call set_memory(u,L,beta,beta_i,beta_f,n_beta,plq_action,n_measurements)
   print*, beta
   !print*,sqrt(2/beta)
+  !call cold_start(u)
   call hot_start(u,L)
   open( unit = 10, file = 'data/data.dat', status = 'unknown')
   do i_b = 1, n_beta
