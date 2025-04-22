@@ -1,9 +1,9 @@
 &parametersfile
-L = 20 ,
-N_thermalization = 10000,
-N_measurements = 1000,
-N_skip = 500,
+L = 10 !100,
+N_thermalization = 1000!50000,
+N_measurements = 1000!10000,
+N_skip = 20 !200,
 beta_i = 0.05,
-beta_f = 5.0,
-n_beta = 20
+beta_f = 20.0,
+n_beta = 40
 /

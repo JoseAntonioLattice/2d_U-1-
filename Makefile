@@ -5,7 +5,7 @@ TARGET = 2dU1.exe
 SRC = src
 BIN = bin
 
-SOURCE = statistics.f90 pbc.f90 arrays.f90 parameters.f90 dynamics.f90 main.f90
+SOURCE = number2string_mod.f90 check_files_directories_mod.f90 create_files.f90 statistics.f90 pbc.f90 arrays.f90 parameters.f90 dynamics.f90 main.f90
 
 OBJECT = $(patsubst %, $(BIN)/%, $(SOURCE:.f90=.o ) )
 
