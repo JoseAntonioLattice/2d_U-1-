@@ -22,7 +22,7 @@ $(BIN)/%.o: $(SRC)/%.f90
 .PHONY: help run clean
 
 run:
-	@echo input_parameters.par | time $(BIN)/$(TARGET)
+	{ echo input_parameters.par ; echo "beibi_1.dat" ; } | time $(BIN)/$(TARGET)
 
 clean:
 	rm -f $(OBJECT) $(BIN)/$(TARGET)

@@ -37,4 +37,25 @@ contains
     
   end subroutine create_measurements_file
 
+  subroutine create_measurements_file_2(L,DATA_FILE,outunit)
+    integer, intent(in) :: L
+    integer, intent(out) :: outunit
+
+    character(:), allocatable :: directory, path
+    character(*), intent(in) :: data_file
+
+    
+    directory = "data"
+    call check_directory(directory)
+    
+    directory = directory//"/L="//trim(int2str(L))
+    call check_directory(directory)
+
+    path = trim(directory)//"/"//trim(data_file)
+    open(newunit = outunit, file = trim(path), status = 'unknown')
+    
+  end subroutine create_measurements_file_2
+
+
+  
 end module create_files

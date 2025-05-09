@@ -17,8 +17,8 @@ cat <<EOF >> jobs/$filename$1.slurm
 #SBATCH --mem=4G      			# Memoria RAM necesaria (puedes cambiarlo)
 
 module load lamod/gcc/12.2 
-cd /home/icn/joseantog/2d_U-1-
+cd ~/2d_U-1-
 # Comando para ejecutar tu programa
-make run
+@{ echo "input_parameters.par"; echo measurements_$1.dat; } | bin/2dU1.exe
 
 EOF

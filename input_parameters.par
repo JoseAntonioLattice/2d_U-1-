@@ -1,7 +1,7 @@
 &parametersfile
 L = 10!100,
-N_thermalization = 100!50000,
-N_measurements = 100!10000,
+N_thermalization = 1000!50000,
+N_measurements = 1000!10000,
 N_skip = 20!200,
 beta_i = 0.05,
 beta_f = 10.0,
