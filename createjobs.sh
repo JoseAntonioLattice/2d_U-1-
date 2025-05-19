@@ -1,8 +1,8 @@
 #!/bin/bash
 
 
-filename=2dU1_L100_
-jobname=L100_
+filename=2dU1_L64_
+jobname=L64_
 #touch $filename$1.slurm
 
 cat <<EOF >> jobs/$filename$1.slurm
@@ -19,6 +19,6 @@ cat <<EOF >> jobs/$filename$1.slurm
 module load lamod/gcc/12.2 
 cd ~/2d_U-1-
 # Comando para ejecutar tu programa
-@{ echo "input_parameters.par"; echo measurements_$1.dat; } | bin/2dU1.exe
+{ echo "input_parameters.par"; echo "measurements_$1.dat" ; } | bin/2dU1.exe
 
 EOF
