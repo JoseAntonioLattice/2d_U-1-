@@ -25,7 +25,8 @@ program U1_2d
   call create_measurements_file_2(L,trim(outputfilename),outunit)
   call system_clock(count_rate = rate)
   call system_clock(count = start_time)
-  call hot_start(u,L)
+  !call hot_start(u,L)
+  u = 1.0_dp
   !open( newunit = outunit, file = outputfilename, status = 'old')
   do i_b = 1, n_beta
      call initialization(u,plq_action,beta(i_b),N_thermalization,N_measurements, N_skip)

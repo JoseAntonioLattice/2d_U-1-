@@ -28,7 +28,7 @@ contains
     do i_beta = 1, nbeta 
        beta(i_beta) = betai + (betaf - betai)/(nbeta-1)*(i_beta-1)
     end do
-    beta = 1/beta**2
+    !beta = 1/beta**2
     !beta_copy = beta
 
    !do i_beta = 1, nbeta

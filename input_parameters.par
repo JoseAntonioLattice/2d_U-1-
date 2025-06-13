@@ -1,8 +1,8 @@
 &parametersfile
 L = 64
-N_thermalization = 50000,
-N_measurements = 25000,
-N_skip = 200,
+N_thermalization = 1000,
+N_measurements = 1000,
+N_skip = 10,
 beta_i = 0.05,
 beta_f = 10.0,
 n_beta = 40
