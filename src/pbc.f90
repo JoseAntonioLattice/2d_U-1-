@@ -4,31 +4,40 @@ module pbc
   
   implicit none
 
-  integer, allocatable, dimension(:) :: ip, im
+  integer, allocatable, dimension(:) :: ip1, im1, ip2, im2
 
 contains
 
   subroutine set_pbc(L)
     
-    integer(i4), intent(in) :: L
+    integer(i4), intent(in) :: L(2)
 
-    allocate(ip(L), im(L))
+    allocate(ip1(L(1)), im1(L(1)))
+    allocate(ip2(L(2)), im2(L(2)))
     call initialize(L)
     
   end subroutine set_pbc
 
   subroutine initialize(L)
 
-    integer(i4), intent(in) :: L
+    integer(i4), intent(in) :: L(2)
     integer(i4) :: i
 
-    do i = 1, L
-       ip(i) = i + 1
-       im(i) = i - 1
+    do i = 1, L(1)
+       ip1(i) = i + 1
+       im1(i) = i - 1
     end do
-    ip(L) = 1
-    im(1) = L
+    ip1(L(1)) = 1
+    im1(1) = L(1)
 
+    
+    do i = 1, L(2)
+       ip2(i) = i + 1
+       im2(i) = i - 1
+    end do
+    ip2(L(2)) = 1
+    im2(1) = L(2)
+    
   end subroutine initialize
 
   function ipf(vector, mu)
@@ -40,8 +49,12 @@ contains
     
     ipf = vector
 
-    ipf(mu) = ip(vector(mu))
-    
+    select case(mu)
+    case(1)
+       ipf(mu) = ip1(vector(mu))
+    case(2)
+       ipf(mu) = ip2(vector(mu))
+    end select
   end function ipf
 
   function imf(vector, mu)
@@ -53,7 +66,12 @@ contains
     
     imf = vector
 
-    imf(mu) = im(vector(mu))
+    select case(mu)
+    case(1)
+       imf(mu) = im1(vector(mu))
+    case(2)
+       imf(mu) = im2(vector(mu))
+    end select
     
   end function imf
   

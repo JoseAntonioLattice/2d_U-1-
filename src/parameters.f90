@@ -4,7 +4,7 @@ module parameters
 
   implicit none
 
-  integer(i4) :: L
+  integer(i4) :: L(2)
   integer(i4) :: N_thermalization
   integer(i4) :: N_measurements
   integer(i4) :: N_skip
